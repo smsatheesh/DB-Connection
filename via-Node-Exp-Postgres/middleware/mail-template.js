@@ -1,4 +1,4 @@
-const HTML_TEMPLATE = (textHeaderData, textBodyData) => {
+const HTML_TEMPLATE = ( textHeaderData, textBodyData ) => {
     return `
       <!DOCTYPE html>
       <html>

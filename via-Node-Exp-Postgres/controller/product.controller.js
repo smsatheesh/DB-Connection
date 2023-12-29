@@ -3,6 +3,7 @@ const mailer = require( "./mail.controller" );
 const HTML_TEMPLATE = require( "./../middleware/mail-template.js" );
 const config = require( "./../config/app.config" );
 const print = console.log.bind( console );
+
 let fetchProducts = async ( req, res ) => {
 
     client.query( 

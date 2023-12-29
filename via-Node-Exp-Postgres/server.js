@@ -3,6 +3,7 @@ const bodyParser = require( "body-parser" );
 const router = require( "./routes/product.router" );
 const client = require( "./config/connection" );
 const config = require('./config/app.config');
+
 const app = express();
 
 const print = console.log.bind( console );

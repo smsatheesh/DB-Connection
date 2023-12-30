@@ -21,6 +21,6 @@ let listener = app.listen( PORT, () => {
 
 client.connect();
 client.on( "connect", () => {
-    client.query( `SET schema '${ config.APP.DB_SCHEMA }' ` );
+    client.query( `SET schema '${ config.DB.DB_SCHEMA }' ` );
     print( "Database connected" );
 });

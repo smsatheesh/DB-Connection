@@ -103,7 +103,7 @@ let insertProduct = ( req, res ) => {
                     print("MESSAGE ID: ", info.messageId);
                 });
             }
-            res.status(200).send( "Inserted successfully !!" );
+            res.status(201).send( "Inserted successfully !!" );
         } else if( err ) {
 
             print( err.message );
@@ -161,7 +161,7 @@ let updateProduct = async ( req, res ) => {
                         print("MESSAGE ID: ", info.messageId);
                     });
                 }
-                res.status(200).send( "Updated successfully !! " );
+                res.status(204).send( "Updated successfully !! " );
             } else if( err ) {
                 
                 print( err.message );
@@ -199,7 +199,7 @@ let deleteProduct = ( req, res ) => {
                 print("MESSAGE ID: ", info.messageId);
             });
 
-            res.status(200).send( "Deleted successfully !!" );
+            res.status(204).send( "Deleted successfully !!" );
         } else if( err ) {
 
             print( err.message );

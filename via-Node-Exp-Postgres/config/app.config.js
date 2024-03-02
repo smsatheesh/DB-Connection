@@ -12,7 +12,7 @@ module.exports = {
     },
     DB: {
         NAME: process.env.DB || "postgres",
-        DB_SCHEMA: process.env.DB_SCHEMA || "training",
+        DB_SCHEMA: process.env.DB_SCHEMA || "project",
         DB_HOST: process.env.DB_HOST || "localhost",
         DB_PORT: process.env.DB_PORT || "5432",
         DB_USER_PGPLSQL: process.env.DB_USER_PGPLSQL || "postgres",

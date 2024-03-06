@@ -4,16 +4,21 @@ process.env.QVWS_APP_CONFIG = "development";
 
 const express = require( "express" ),
    bodyParser = require( "body-parser" ),
-       router = require( "./routes/product.router" ),
        client = require( "./config/connection" ),
        config = require( "./config/app.config" ),
        models = require( "./models/index" ),
         https = require( "https" ),
+         http = require( "http" ), 
         debug = require( "debug" )( "nodeformio:server" ),
         print = console.log.bind( console );
 
 const app = express();
 app.set('config', config);
+ 
+app.get("/", (req, res) => {
+    res.json({ message: "Welcome to bezkoder application." });
+});
+require( "./routes/index" )( app );
 
 const PORT = normalisePort( config.APP.PORT || models.config.APP.PORT );
 app.set( "port", PORT );
@@ -21,18 +26,15 @@ app.set( "port", PORT );
 app.use( bodyParser.json() );
 app.use( bodyParser.urlencoded({ extended: true }) );
 
-app.use( '/', router );
-
 let server = null;
-if( client.enable_https && process.env.QVWS_APP_CONFIG === "development" )
+if( client.enable_https && process.env.QVWS_APP_CONFIG !== "development" )
     server = https.createServer( httpsOptions, app );
 else
-    server = https.createServer( app );
+    server = http.createServer( app );
 
 startHTTPserver();
 
 function startHTTPserver() {
-
     /*
         CREATING http server
     */
@@ -62,9 +64,9 @@ function normalisePort( portNo ) {
 
 function onListening() {
     const address = server.address();
-    let bind = typeof ( address === "string")? 'Pipe' + address: 'Port' + address;
+    let bind = ( typeof address === "string")? 'pipe' + address: 'port ' + address.port;
     debug( "Listening on " + bind );
-    console.log( "Server is listening on the port: " + PORT );
+    console.log( "Server is listening on the port: " + address.port );
 }
 
 function onError( error ) {

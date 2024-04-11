@@ -4,27 +4,25 @@ process.env.QVWS_APP_CONFIG = "development";
 
 const express = require( "express" ),
    bodyParser = require( "body-parser" ),
-       client = require( "./config/connection" ),
-       config = require( "./config/app.config" ),
-       models = require( "./models/index" ),
+        client = require( "./config/connection" ),
+        config = require( "./config/app.config" ),
+        models = require( "./models/index" ),
         https = require( "https" ),
-         http = require( "http" ), 
+        http = require( "http" ), 
         debug = require( "debug" )( "nodeformio:server" ),
         print = console.log.bind( console );
 
 const app = express();
 app.set('config', config);
- 
-app.get("/", (req, res) => {
-    res.json({ message: "Welcome to bezkoder application." });
-});
+
+app.use( bodyParser.urlencoded({ extended: true }) );
+app.use( bodyParser.json() );
+
 require( "./routes/index" )( app );
 
 const PORT = normalisePort( config.APP.PORT || models.config.APP.PORT );
 app.set( "port", PORT );
 
-app.use( bodyParser.json() );
-app.use( bodyParser.urlencoded({ extended: true }) );
 
 let server = null;
 if( client.enable_https && process.env.QVWS_APP_CONFIG !== "development" )

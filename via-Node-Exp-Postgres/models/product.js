@@ -22,6 +22,7 @@ module.exports = ( sequelize, DataTypes ) => {
             type: DataTypes.BIGINT
         }
     }, {
+
         timestamps: false,
         hasTrigger: false,
         hasTrigger: false,
@@ -29,6 +30,15 @@ module.exports = ( sequelize, DataTypes ) => {
         schema: config.DB.DB_SCHEMA,
         tableName: "products"
     });
+
+    product.associate = function( models ) {
+
+        product.hasMany( models.product_detail, {
+            sourceKey: "id",
+            foreignKey: "product_id",
+            as: "product_detail"
+        });
+    }
 
     return product;
 }

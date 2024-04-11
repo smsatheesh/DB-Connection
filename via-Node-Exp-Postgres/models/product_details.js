@@ -12,17 +12,17 @@ module.exports = ( sequelize, DataTypes ) => {
             primaryKey: true,
             autoIncrement: true,
             type: DataTypes.BIGINT
-        },
+        }, 
         product_id: {
-            allowNull: false,
+            alllowNull: false,
             type: DataTypes.BIGINT
         },
         price: {
             allowNull: false,
             type: DataTypes.BIGINT
         },
-        stock: {
-            allowNull: true,
+        stocks: {
+            allowNull: false,
             type: DataTypes.BIGINT,
             defaultValue: "1"
         },
@@ -32,10 +32,11 @@ module.exports = ( sequelize, DataTypes ) => {
             defaultValue: sequelize.NOW
         },
         expiry_date: {
-            alllowNull: true,
+            alllowNull: false,
             type: DataTypes.DATE
         }
     }, {
+        
         timestamps: false,
         hasTrigger: false,
         freezeTableName: true,
@@ -43,6 +44,15 @@ module.exports = ( sequelize, DataTypes ) => {
         tableName: "product_details",
         freezeTableName: true
     });
+
+    product_detail.associate = function( models ) {
+
+        product_detail.belongsTo( models.product, {
+            sourceKey: "id",
+            foreignKey: "product_id",
+            as: "product"
+        });
+    }
 
     return product_detail;
 } 

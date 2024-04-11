@@ -16,4 +16,12 @@ router.post( "/build/products", ( req, res, next ) => {
     productController.buildProducts( req, res, next );
 });
 
+router.put( "/revise/product/details/:id",  ( req, res, next ) => {
+    productController.reviseProduct( req, res, next );
+});
+
+router.delete( "/remove/product/:id", ( req, res, next ) => {
+    productController.removeProduct( req, res, next );
+});
+
 module.exports = router;

@@ -67,6 +67,95 @@ let ProductController = {
         }
     },
 
+    reviseProduct: async( req, res, next ) => {
+
+        const transaction = await models.sequelize.transaction();
+
+        try {
+
+            if( req.body && req.body[ "id" ] ) {
+
+                let updateObject = {
+                    id: req.body.id,
+                    price: req.body.price,
+                    stocks: req.body.stocks,
+                    expiry_date: req.body.expiry_date
+                }
+
+                await models.product_detail.update( updateObject, 
+                    { 
+                        where: { 
+                            id: { 
+                                [ op.eq ]: req.body.id 
+                            } 
+                        } 
+                    }, { transaction })
+                .then( async ( respone ) => {
+                    await transaction.commit();
+                    return res.status( 200 ).send( "Updated successfully !" );
+                })
+                .catch(( error ) => {
+                    throw error;
+                });
+            } else {
+                throw "id not exits";
+            }
+
+        } catch( error ) {
+            await transaction.rollback();
+            next( error );
+            return res.status( 500 ).send( error.message? error.message: error );
+        }
+    },
+
+    removeProduct: async( req, res, next ) => {
+
+        const transaction = await models.sequelize.transaction();
+
+        try {
+
+            if( req.body && req.params[ "id" ] ) {
+
+                await models.product_detail.destroy({
+                    where: {
+                        id: {
+                            [ op.eq ]: req.params[ "id" ]
+                        }
+                    }
+                })
+                .then( async ( response ) => {
+
+                    await models.product.destroy({
+                        where: {
+                            id: {
+                                [ op.eq ]: req.params[ "id" ]
+                            }
+                        }
+                    })
+                    .then( async ( response ) => {
+                            
+                        await transaction.commit();
+                        return res.status( 200 ).send( "Deleted successfully !" );
+                    })
+                    .catch(( error ) => {
+                        throw error;
+                    });
+                })
+                .catch(( error ) => {
+                    throw error;
+                });
+
+            } else {
+                throw "id not exits"
+            }
+
+        } catch( error ) {
+            await transaction.rollback();
+            next( error );
+            return res.status( 500 ).send( error.message );
+        }
+    },
+
     fetchProducts: async ( req, res, next ) => {
         
         try {

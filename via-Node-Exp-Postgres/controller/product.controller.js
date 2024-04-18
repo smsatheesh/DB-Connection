@@ -1,228 +1,335 @@
-const client = require( "../config/connection" );
+
+const sequelize = require( "sequelize" );
+const models = require( "../models" );
+const op = sequelize.Op;
+const config = require( "./../config/app.config.js" );
 const mailer = require( "./mail.controller" );
-const HTML_TEMPLATE = require( "./../middleware/mail-template.js" );
-const config = require( "./../config/app.config" );
+const HTML_TEMPLATE = require( "./../middleware/mail-template" );
 const print = console.log.bind( console );
 
-let fetchProducts = async ( req, res ) => {
-
-    client.query( 
-        `
-            SELECT * FROM retail_db
-        `, 
-        ( err, result ) => {
-
-            if( !err ) {
-
-                if( result.rows.length > 0 ) {
-
-                    textHeaderData = "Fetched Products ";
-                    textBodyData = "Products have been fetched from retail_db";
-
-                    mailOptions.subject = textHeaderData;
-                    mailOptions.body = textBodyData;
-                    mailOptions.html = HTML_TEMPLATE( textHeaderData, textBodyData );
-
-                    mailer(mailOptions, (info) => {
-                        print("Email sent successfully");
-                        print("MESSAGE ID: ", info.messageId);
-                    });
-                }
-                return res.status(200).send( result.rows );
-            } else if( err ) {
-
-                print( err.message );
-                return res.status(500).send( "Internal server error !!" );
-            }else 
-                return res.status(404).send( "Bad request" );
-        }
-    );
-};
-
-let fetchProduct = ( req, res ) => {
-
-    client.query(
-    `
-        SELECT * FROM retail_db WHERE product_id = '${req.params.id}'
-    `,
-    ( err, result ) => {
-
-        if( !err ) {
-
-            if( result.rows.length > 0 ) {
-
-                textHeaderData = "Fetched Product ";
-                textBodyData = `Product id -> '${req.params.id}' have been fetched from retail_db, ${result["rows"][0]["product_name"]} `;
-
-                mailOptions.subject = textHeaderData;
-                mailOptions.body = textBodyData;
-                mailOptions.html = HTML_TEMPLATE( textHeaderData, textBodyData );
-
-                mailer(mailOptions, (info) => {
-                    print("Email sent successfully");
-                    print("MESSAGE ID: ", info.messageId);
-                });
-            }
-            
-            res.status(200).send( result.rows );
-        } else if( err ) {
-
-            print( err.message );
-            res.status(500).send( "Internal server error !! " );
-        } else 
-            res.status(404).send( "Bad request" );
-    });
-};
-
-let insertProduct = ( req, res ) => {
-
-    let reqBody = req.body;
-    print( reqBody );
-    client.query(
-    `
-        INSERT INTO retail_db (category, product_name, product_description, price, stocks, inward_date, expiry_date)
-        VALUES('${reqBody.category}', '${reqBody.product_name}', '${reqBody.product_description}', '${reqBody.price}', '${reqBody.stocks}', '${reqBody.inward_date}', '${reqBody.expiry_date}' )
-    `,
-    async ( err, result ) => {
-
-        if( !err ) {
-
-            print( "Inserted successfully " );
-            
-            if( reqBody && reqBody.product_name ) {
-
-                textHeaderData = "Inserted Product ";
-                textBodyData = `Product ${reqBody.product_name} have been inserted into retail_db`;
-
-                mailOptions.subject = textHeaderData;
-                mailOptions.body = textBodyData;
-                mailOptions.html = HTML_TEMPLATE( textHeaderData, textBodyData );
-
-                await mailer(mailOptions, (info) => {
-                    print("Email sent successfully");
-                    print("MESSAGE ID: ", info.messageId);
-                });
-            }
-            res.status(201).send( "Inserted successfully !!" );
-        } else if( err ) {
-
-            print( err.message );
-            res.status(500).send( "Internal server error !!" );
-        } else 
-            res.status(404).send( "Bad request" );
-    });
-};
-
-let updateProduct = async ( req, res ) => {
-
-    let reqBody = req.body;
-    let responseBody;
-    responseBody = await client.query(
-                    `
-                        SELECT * FROM retail_db WHERE product_id = ${req.params.id}
-                    `);
-
-    if( responseBody && responseBody.rowCount >= 1 ) {
-        
-        let updateQuery = '';
-
-        for( const [key, value] of Object.entries( reqBody ) ) {
-
-            if( updateQuery != '' )
-                updateQuery += ', ' + `${key} = '${value}'`;
-            else
-                updateQuery += `${key} = '${value}'`;
-        }
-
-        client.query(
-        `
-            UPDATE retail_db 
-                SET 
-                    ${updateQuery}
-                WHERE
-                    product_id = '${req.params.id}'
-        `,
-        async ( err, result ) => {
-
-            if( !err ) {
-
-                print( "Updated successfully" );
-                if( responseBody && responseBody.rows && responseBody.rows[0].product_name ) {
-                    
-                    textHeaderData = "Updated Product ";
-                    textBodyData = `Product ${responseBody.rows[0].product_name} have been inserted into retail_db`;
-
-                    mailOptions.subject = textHeaderData;
-                    mailOptions.body = textBodyData;
-                    mailOptions.html = HTML_TEMPLATE( textHeaderData, textBodyData );
-
-                    await mailer(mailOptions, (info) => {
-                        print("Email sent successfully");
-                        print("MESSAGE ID: ", info.messageId);
-                    });
-                }
-                res.status(204).send( "Updated successfully !! " );
-            } else if( err ) {
-                
-                print( err.message );
-                res.status(500).send( "Internal server error !!" );
-            } else
-                res.status(404).send( "Bad request" );
-        });
-    } else {
-
-        res.status(404).send( "Product not exist" );
-    }
-};
-
-let deleteProduct = ( req, res ) => {
-
-    client.query(
-    `
-        DELETE FROM retail_db WHERE product_id = ${req.params.id}
-    `,
-    async ( err, result ) => {
-
-        if( !err ) {
-
-            print( "Deleted successfully " );
-
-            textHeaderData = "Deleted Product ";
-            textBodyData = `Product have been inserted into retail_db`;
-
-            mailOptions.subject = textHeaderData;
-            mailOptions.body = textBodyData;
-            mailOptions.html = HTML_TEMPLATE( textHeaderData, textBodyData );
-
-            await mailer(mailOptions, (info) => {
-                print("Email sent successfully");
-                print("MESSAGE ID: ", info.messageId);
-            });
-
-            res.status(204).send( "Deleted successfully !!" );
-        } else if( err ) {
-
-            print( err.message );
-            res.status( 500 ).send( "Internal server error !!" );
-        } else
-            res.status(404).send( "Bad request" );
-    });
-};
-
-var mailOptions = {
+let mailOptions = {
     from: config.MAIL.FROM_ADDRESS,
     to: config.MAIL.TO_ADDRESS,
-    subject: textHeaderData,
-    text: textBodyData,
-    html: HTML_TEMPLATE( textHeaderData, textBodyData )
+    subject: '',
+    text: '',
+    html: ''
 };
 
-var textHeaderData, textBodyData;
+// Adding controller methods
+let ProductController = {
+    
+    buildProducts: async( req, res, next ) => {
+    
+        const transaction = await models.sequelize.transaction();
 
-module.exports = { 
-    fetchProducts,
-    fetchProduct,
-    insertProduct,
-    updateProduct,
-    deleteProduct
-};
+        try {
+
+            if( req.body[ "length" ] > 0 ) {
+
+                let payLoadForProuct = [], payLoadForProductDetails = [];
+                let product_creation_response;
+
+                for( let element of req.body ) {
+
+                    payLoadForProuct.push({
+                        product_name: element[ "name" ],
+                        product_description: element[ "description" ] 
+                    });
+
+                    payLoadForProductDetails.push({
+                        product_name: element[ "name" ],
+                        price: element[ "price" ],
+                        stocks: element[ "stocks" ],
+                        inward_date: new Date( Date.now() ),
+                        expiry_date: element[ "expiry_date" ]
+                    });
+                }
+
+                await models.product.bulkCreate( payLoadForProuct, { raw: true }, { transaction })
+                    .then(( response ) => {
+
+                        if( response && response[ "length" ] > 0 ) {
+                            textHeaderData = "Inserted Products ";
+                            textBodyData = "Products have been inserted into retail database";
+        
+                            mailOptions.subject = textHeaderData;
+                            mailOptions.body = textBodyData;
+                            mailOptions.html = HTML_TEMPLATE( textHeaderData, textBodyData );
+        
+                            mailer( mailOptions, ( info ) => {
+                                print("Email sent successfully");
+                                print("MESSAGE ID: ", info.messageId);
+                            });
+                        }
+        
+                        product_creation_response = response;
+                    })
+                    .catch( async ( error ) => {
+                        await transaction.rollback();
+                        throw error;
+                    });
+
+
+                for( let unq_values of product_creation_response ) {
+
+                    for( let innr_loop = 0; innr_loop < payLoadForProductDetails[ "length" ]; innr_loop++ ) {
+
+                        if( payLoadForProductDetails[ innr_loop ][ "product_name" ] == unq_values[ "dataValues" ][ "product_name" ] )
+                            payLoadForProductDetails[ innr_loop ][ "product_id" ] = unq_values[ "dataValues" ][ "id" ];
+                    }
+                }
+
+                await models.product_detail.bulkCreate( payLoadForProductDetails, { raw: true }, { transaction });
+
+                await transaction.commit();
+                return res.status( 201 ).send( "Data created successfully !" );
+            } else
+                return res.status( 200 ).send( "No product details exists !" );
+
+        } catch( error ) {
+            await transaction.rollback();
+            next( error );
+            return res.status( 500 ).send( error.message );
+        }
+    },
+
+    reviseProduct: async( req, res, next ) => {
+
+        const transaction = await models.sequelize.transaction();
+
+        try {
+
+            if( req.body && req.body[ "id" ] ) {
+
+                let updateObject = {
+                    id: req.body.id,
+                    price: req.body.price,
+                    stocks: req.body.stocks,
+                    expiry_date: req.body.expiry_date
+                }
+
+                await models.product_detail.update( updateObject, 
+                    { 
+                        where: { 
+                            id: { 
+                                [ op.eq ]: req.body.id 
+                            } 
+                        } 
+                    }, { transaction })
+                .then( async ( response ) => {
+                    await transaction.commit();
+
+                    if( response && response[ "length" ] > 0 ) {
+                        textHeaderData = "Updated Product";
+                        textBodyData = "Product id :  " + updateObject[ "id" ] + " have been updated in retail database";
+
+                        mailOptions.subject = textHeaderData;
+                        mailOptions.body = textBodyData;
+                        mailOptions.html = HTML_TEMPLATE( textHeaderData, textBodyData );
+
+                        mailer( mailOptions, (info) => {
+                            print("Email sent successfully");
+                            print("MESSAGE ID: ", info.messageId);
+                        });
+                    }
+
+                    return res.status( 200 ).send( "Updated successfully !" );
+                })
+                .catch(( error ) => {
+                    throw error;
+                });
+            } else {
+                throw "id not exits";
+            }
+
+        } catch( error ) {
+            await transaction.rollback();
+            next( error );
+            return res.status( 500 ).send( error.message? error.message: error );
+        }
+    },
+
+    removeProduct: async( req, res, next ) => {
+
+        const transaction = await models.sequelize.transaction();
+
+        try {
+
+            if( req.body && req.params[ "id" ] ) {
+
+                await models.product_detail.destroy({
+                    where: {
+                        id: {
+                            [ op.eq ]: req.params[ "id" ]
+                        }
+                    }
+                })
+                .then( async ( response ) => {
+
+                    await models.product.destroy({
+                        where: {
+                            id: {
+                                [ op.eq ]: req.params[ "id" ]
+                            }
+                        }
+                    })
+                    .then( async ( response ) => {
+                            
+                        await transaction.commit();
+
+                        if( response && response[ "length" ] > 0 ) {
+                            textHeaderData = "Fetched Products ";
+                            textBodyData = "Product id : " + req.params[ "id" ] + " have been removed from retail database";
+
+                            mailOptions.subject = textHeaderData;
+                            mailOptions.body = textBodyData;
+                            mailOptions.html = HTML_TEMPLATE( textHeaderData, textBodyData );
+
+                            mailer( mailOptions, ( info ) => {
+                                print("Email sent successfully");
+                                print("MESSAGE ID: ", info.messageId);
+                            });
+                        }
+
+                        return res.status( 200 ).send( "Deleted successfully !" );
+                    })
+                    .catch(( error ) => {
+                        throw error;
+                    });
+                })
+                .catch(( error ) => {
+                    throw error;
+                });
+
+            } else {
+                throw "id not exits"
+            }
+
+        } catch( error ) {
+            await transaction.rollback();
+            next( error );
+            return res.status( 500 ).send( error.message );
+        }
+    },
+
+    fetchProducts: async ( req, res, next ) => {
+        
+        try {
+
+            await models.product.findAll({
+                attributes: [
+                    [ models.sequelize.col( "product.id" ), "product_id" ],
+                    [ models.sequelize.col( "product_name" ), "product_name" ],
+                    [ models.sequelize.col( "product_description" ), "product_descritpion" ],
+                    [ models.sequelize.col( "product_detail.price" ), "price" ],
+                    [ models.sequelize.col( "product_detail.stocks" ), "stocks" ],
+                    [ models.sequelize.col( "product_detail.inward_date" ), "inward_date" ],
+                    [ models.sequelize.col( "product_detail.expiry_date" ), "expiry_date" ]
+                ],
+                raw: true,
+                order: [
+                    [ "id", "ASC" ]
+                ],
+                include: [
+                    {
+                        model: models.product_detail,
+                        attributes: [],
+                        required: true,
+                        duplicating: false,
+                        as: "product_detail"
+                    }
+                ]
+            })
+            .then(( response ) => {
+
+                if( response && response[ "length" ] > 0 ) {
+                    textHeaderData = "Fetched Products ";
+                    textBodyData = "Products have been fetched from retail database";
+
+                    mailOptions.subject = textHeaderData;
+                    mailOptions.body = textBodyData;
+                    mailOptions.html = HTML_TEMPLATE( textHeaderData, textBodyData );
+
+                    mailer( mailOptions, ( info ) => {
+                        print("Email sent successfully");
+                        print("MESSAGE ID: ", info.messageId);
+                    });
+                }
+
+                return res.status( 200 ).json( response );
+            })
+            .catch(( error ) => {
+                throw error;
+            });
+        } catch( error ) {
+            next( error );
+            return res.status( 500 ).send( error.message );
+        }
+    },
+
+    fetchSpecificProduct: async ( req, res, next ) => {
+
+        try {
+
+            const product_id = req.params.id;
+
+            await models.product.findOne({
+                attributes: [
+                    [ models.sequelize.col( "product.id" ), "product_id" ],
+                    [ models.sequelize.col( "product_name" ), "product_name" ],
+                    [ models.sequelize.col( "product_description" ), "product_descritpion" ],
+                    [ models.sequelize.col( "product_detail.price" ), "price" ],
+                    [ models.sequelize.col( "product_detail.stocks" ), "stocks" ],
+                    [ models.sequelize.col( "product_detail.inward_date" ), "inward_date" ],
+                    [ models.sequelize.col( "product_detail.expiry_date" ), "expiry_date" ]
+                ],
+                raw: true,
+                order: [
+                    [ "id", "ASC" ]
+                ],
+                include: [
+                    {
+                        model: models.product_detail,
+                        attributes: [],
+                        required: true,
+                        duplicating: false,
+                        as: "product_detail"
+                    }
+                ],
+                where: {
+                    id: {
+                        [ op.eq ]: product_id
+                    }
+                },
+                limit: 1
+            })
+            .then(( response ) => {
+
+                if( response && response[ "length" ] > 0 ) {
+                    textHeaderData = "Fetched Product " + response[ "product_name" ];
+                    textBodyData = "Product " + response[ "product_name" ] + " have been fetched from retail database";
+
+                    mailOptions.subject = textHeaderData;
+                    mailOptions.body = textBodyData;
+                    mailOptions.html = HTML_TEMPLATE( textHeaderData, textBodyData );
+
+                    mailer( mailOptions, ( info ) => {
+                        print("Email sent successfully");
+                        print("MESSAGE ID: ", info.messageId);
+                    });
+                }
+
+                return res.status( 200 ).send( response );
+            })
+            .catch(( error ) => {
+                return res.status( 500 ).send( error.message );
+            });
+
+        } catch( error ) {
+            next( error );
+            return res.status( 500 ).send( error.message ); 
+        }
+    } 
+}
+
+module.exports = ProductController;

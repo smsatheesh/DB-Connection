@@ -4,24 +4,24 @@ const productController = require( "../controller/product.controller" );
 
 // Adding routes
 
-router.get( '/', (req, res) => {
-    productController.fetchProducts(req, res);
+router.get( "/fetch/products/all", ( req, res, next ) => {
+    productController.fetchProducts( req, res, next );
 });
 
-router.get( '/product/:id', (req, res) => {
-    productController.fetchProduct(req, res);
+router.get( "/fetch/product/:id", ( req, res, next ) => {
+    productController.fetchSpecificProduct( req, res, next );
 });
 
-router.post( '/product/insert', (req, res) => {
-    productController.insertProduct(req, res);
+router.post( "/build/products", ( req, res, next ) => {
+    productController.buildProducts( req, res, next );
 });
 
-router.put( '/product/update/:id', (req, res) => {
-    productController.updateProduct(req, res);
+router.put( "/revise/product/details/:id",  ( req, res, next ) => {
+    productController.reviseProduct( req, res, next );
 });
 
-router.delete( '/product/delete/:id', (req, res) => {
-    productController.deleteProduct(req, res);
+router.delete( "/remove/product/:id", ( req, res, next ) => {
+    productController.removeProduct( req, res, next );
 });
 
 module.exports = router;

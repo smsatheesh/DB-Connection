@@ -212,61 +212,6 @@ let ProductController = {
         }
     },
 
-    fetchProducts: async ( req, res, next ) => {
-        
-        try {
-
-            await models.product.findAll({
-                attributes: [
-                    [ models.sequelize.col( "product.id" ), "product_id" ],
-                    [ models.sequelize.col( "product_name" ), "product_name" ],
-                    [ models.sequelize.col( "product_description" ), "product_descritpion" ],
-                    [ models.sequelize.col( "product_detail.price" ), "price" ],
-                    [ models.sequelize.col( "product_detail.stocks" ), "stocks" ],
-                    [ models.sequelize.col( "product_detail.inward_date" ), "inward_date" ],
-                    [ models.sequelize.col( "product_detail.expiry_date" ), "expiry_date" ]
-                ],
-                raw: true,
-                order: [
-                    [ "id", "ASC" ]
-                ],
-                include: [
-                    {
-                        model: models.product_detail,
-                        attributes: [],
-                        required: true,
-                        duplicating: false,
-                        as: "product_detail"
-                    }
-                ]
-            })
-            .then(( response ) => {
-
-                if( response && response[ "length" ] > 0 ) {
-                    textHeaderData = "Fetched Products ";
-                    textBodyData = "Products have been fetched from retail database";
-
-                    mailOptions.subject = textHeaderData;
-                    mailOptions.body = textBodyData;
-                    mailOptions.html = HTML_TEMPLATE( textHeaderData, textBodyData );
-
-                    mailer( mailOptions, ( info ) => {
-                        print("Email sent successfully");
-                        print("MESSAGE ID: ", info.messageId);
-                    });
-                }
-
-                return res.status( 200 ).json( response );
-            })
-            .catch(( error ) => {
-                throw error;
-            });
-        } catch( error ) {
-            next( error );
-            return res.status( 500 ).send( error.message );
-        }
-    },
-
     fetchSpecificProduct: async ( req, res, next ) => {
 
         try {
@@ -329,7 +274,62 @@ let ProductController = {
             next( error );
             return res.status( 500 ).send( error.message ); 
         }
-    } 
+    },
+
+    fetchProducts: async ( req, res, next ) => {
+        
+        try {
+
+            await models.product.findAll({
+                attributes: [
+                    [ models.sequelize.col( "product.id" ), "product_id" ],
+                    [ models.sequelize.col( "product_name" ), "product_name" ],
+                    [ models.sequelize.col( "product_description" ), "product_descritpion" ],
+                    [ models.sequelize.col( "product_detail.price" ), "price" ],
+                    [ models.sequelize.col( "product_detail.stocks" ), "stocks" ],
+                    [ models.sequelize.col( "product_detail.inward_date" ), "inward_date" ],
+                    [ models.sequelize.col( "product_detail.expiry_date" ), "expiry_date" ]
+                ],
+                raw: true,
+                order: [
+                    [ "id", "ASC" ]
+                ],
+                include: [
+                    {
+                        model: models.product_detail,
+                        attributes: [],
+                        required: true,
+                        duplicating: false,
+                        as: "product_detail"
+                    }
+                ]
+            })
+            .then(( response ) => {
+
+                if( response && response[ "length" ] > 0 ) {
+                    textHeaderData = "Fetched Products ";
+                    textBodyData = "Products have been fetched from retail database";
+
+                    mailOptions.subject = textHeaderData;
+                    mailOptions.body = textBodyData;
+                    mailOptions.html = HTML_TEMPLATE( textHeaderData, textBodyData );
+
+                    mailer( mailOptions, ( info ) => {
+                        print("Email sent successfully");
+                        print("MESSAGE ID: ", info.messageId);
+                    });
+                }
+
+                return res.status( 200 ).json( response );
+            })
+            .catch(( error ) => {
+                throw error;
+            });
+        } catch( error ) {
+            next( error );
+            return res.status( 500 ).send( error.message );
+        }
+    }
 }
 
 module.exports = ProductController;

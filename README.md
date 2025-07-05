@@ -69,7 +69,13 @@ cd via-Node-Exp-Postgres
 npm install
 ```
 
-3. Create a `.env` file in the project root with the following variables:
+3. Copy the `.env.example` file to create your `.env`:
+
+```bash
+cp .env.example .env
+```
+
+4. Update the `.env` file with your configuration:
 
 ```env
 PORT=3001
@@ -110,12 +116,18 @@ The server will start on http://localhost:3001 (or the PORT specified in .env)
 
 ## API Documentation
 
-### MongoDB with Mongoose Project
+Both projects include Swagger documentation accessible at:
 
-The project includes Swagger documentation accessible at:
+### MongoDB with Mongoose Project
 
 ```
 http://localhost:3000/api-docs
+```
+
+### PostgreSQL with Sequelize Project
+
+```
+http://localhost:3001/api-docs
 ```
 
 ### Available Endpoints
@@ -141,9 +153,13 @@ Both projects implement similar REST API endpoints for product management:
 ### PostgreSQL with Sequelize Project
 
 - PostgreSQL database integration using Sequelize
+- Swagger API documentation
+- Winston logging implementation
+- Centralized error handling with custom error messages
 - Email notifications using Nodemailer
-- Product CRUD operations
-- Error handling middleware
+- Service layer architecture for better code organization
+- Product CRUD operations with detailed product information
+- Enhanced middleware support
 
 ## Development
 
@@ -151,11 +167,11 @@ Both projects use `nodemon` for development, which automatically restarts the se
 
 ## Error Handling
 
-Both projects implement centralized error handling through middleware. Check the respective `middleware` directories for implementation details.
+Both projects implement centralized error handling through middleware with custom error messages. Check the respective `middleware/error.handler.js` and `defaults/error.message.js` files for implementation details.
 
 ## Logging
 
-The MongoDB project uses Winston for logging. Logs are stored in the `logs` directory.
+Both projects now use Winston for logging. Logs are stored in the `logs` directory and can be configured through the `logger/logger.handler.js` file.
 
 ## Contributing
 
@@ -171,4 +187,4 @@ This project is licensed under the ISC License.
 
 ## Author
 
-Sm Satheesh
+[Sm Satheesh](https://github.com/smsatheesh)

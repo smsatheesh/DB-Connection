@@ -1,5 +1,5 @@
-const HTML_TEMPLATE = ( textHeaderData, textBodyData ) => {
-    return `
+const HTML_TEMPLATE = (textHeaderData, textBodyData) => {
+  return `
       <!DOCTYPE html>
       <html>
         <head>
@@ -52,6 +52,6 @@ const HTML_TEMPLATE = ( textHeaderData, textBodyData ) => {
         </body>
       </html>
     `;
-}
+};
 
 module.exports = HTML_TEMPLATE;

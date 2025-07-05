@@ -1,17 +1,42 @@
-const config = require( "./app.config" );
+const logger = require("../logger/logger.handler"),
+  config = require("./app.config"),
+  Sequelize = require("sequelize");
 
-{
-    development = {
-        host: config.DB.DB_HOST,
-        port: config.DB.DB_PORT,
-        user: config.DB.DB_USER_PGPLSQL,
-        password: config.DB.DB_PASSWORD,
-        database: config.DB.NAME,
-        schema_name: config.DB.DB_SCHEMA,
-        dialect: config.DB.NAME,
-        drop_tables: false,
-        enable_https: false
-    }
-}
+const connectionConfig = {
+  host: config.DB.DB_HOST,
+  port: config.DB.DB_PORT,
+  dialect: "postgres",
+  timezone: "+05:30",
+  pool: {
+    max: 5,
+    min: 0,
+    acquire: 30000,
+    idle: 10000,
+  },
+  dialectOptions: {
+    useUTC: false,
+  },
+  enable_https: true,
+};
 
-module.exports = development;
+const sequelize = new Sequelize(
+  config.DB.NAME,
+  config.DB.DB_USER_PGPLSQL,
+  config.DB.DB_PASSWORD,
+  {
+    ...connectionConfig,
+    logging: (msg) => logger.info(msg),
+  }
+);
+
+// Test the connection
+sequelize
+  .authenticate()
+  .then(() => {
+    logger.info("Database connection has been established successfully.");
+  })
+  .catch((err) => {
+    logger.error("Unable to connect to the database:", err);
+  });
+
+module.exports = sequelize;
